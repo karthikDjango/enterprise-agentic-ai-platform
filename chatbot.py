@@ -3,10 +3,15 @@ from graph import app
 
 def get_response(user_question: str) -> str:
     result = app.invoke(
-        {
-            "question": user_question
+    {
+        "question": user_question
+    },
+    config={
+        "configurable": {
+            "thread_id": "session-1"
         }
-    )
+    }
+)
 
     return result["response"]
 
