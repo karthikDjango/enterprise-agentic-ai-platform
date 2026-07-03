@@ -10,4 +10,8 @@ class GraphState(TypedDict):
     classification: Optional[str]
     response: Optional[str]
     tool_used: Optional[str]
+
+    # New field
+    intent: Optional[str]
+
     messages: Annotated[list[BaseMessage], add_messages]
