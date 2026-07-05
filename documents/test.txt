@@ -1,0 +1,1 @@
+LangGraph is an open-source framework developed by LangChain for building stateful, multi-agent AI applications. It uses graph-based workflows to manage conversations, memory, tools, and decision-making.

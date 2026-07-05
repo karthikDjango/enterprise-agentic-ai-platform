@@ -1,16 +1,13 @@
 from state import GraphState
-from tools.calculator import calculate
+from services.math_service import solve_math
 
 
 def math_node(state: GraphState) -> GraphState:
     print("✅ Math Node")
 
-    question = state.get("question")
-
-    result = calculate(question)
+    question = state.get("question", "")
 
     return {
         **state,
-        "tool_used": "calculator",
-        "response": result,
+        "response": solve_math(question),
     }

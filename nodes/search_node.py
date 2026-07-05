@@ -1,34 +1,36 @@
-from langchain_core.messages import HumanMessage, AIMessage
-
 from state import GraphState
-from services.llm_service import ask_gemini
+
+from services.search_service import search
+from services.prompt_service import get_search_prompt
+from services.llm_service import ask_gemini_prompt
 
 
 def search_node(state: GraphState) -> GraphState:
     print("✅ Search Node")
 
-    question = state.get("question")
+    question = state.get("question", "")
 
-    messages = list(state.get("messages", []))
+    search_result = search(question)
 
-    print("\n===== BEFORE GEMINI =====")
-    for msg in messages:
-        print(f"{msg.__class__.__name__}: {msg.content}")
-    print("=========================\n")
+    if not search_result["success"]:
+        state["response"] = (
+            "Unable to retrieve search results."
+        )
+        return state
 
-    messages.append(HumanMessage(content=question))
+    prompt = f"""
+{get_search_prompt()}
 
-    response = ask_gemini(messages)
+User Question:
+{question}
 
-    messages.append(AIMessage(content=response))
+Search Results:
+{search_result["results"]}
+"""
 
-    print("\n===== AFTER GEMINI =====")
-    for msg in messages:
-        print(f"{msg.__class__.__name__}: {msg.content}")
-    print("========================\n")
+    response = ask_gemini_prompt(prompt)
 
-    return {
-        **state,
-        "response": response,
-        "messages": messages,
-    }
+    state["response"] = response
+    state["tool_used"] = search_result["provider"]
+
+    return state

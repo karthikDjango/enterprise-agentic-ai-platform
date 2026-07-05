@@ -1,26 +1,57 @@
-from services.llm_service import ask_gemini_prompt
+print(">>> LOADED NEW intent_service.py")
+
+import re
 
 
 def classify_intent(user_query: str) -> str:
-    prompt = f"""
-You are an intent classifier.
+    """
+    Enterprise Intent Router
 
-Classify the user's request into ONE category.
+    Rule-based routing first.
+    Everything else is treated as a general knowledge request.
+    The Router Node will decide whether to use RAG or Search.
+    """
 
-Categories:
-- SEARCH
-- CHAT
+    query = user_query.lower().strip()
+    print(">>> classify_intent() called")
+    # -------------------------
+    # Greeting
+    # -------------------------
+    greetings = {
+        "hi",
+        "hello",
+        "hey",
+        "good morning",
+        "good afternoon",
+        "good evening",
+    }
 
-Rules:
-- SEARCH: User is asking for facts, latest news, weather, sports, information, internet lookup, current events.
-- CHAT: Greetings, conversation, explanations, coding help, brainstorming, writing.
+    if query in greetings:
+        return "greeting"
 
-Return ONLY one word.
+    # -------------------------
+    # Weather
+    # -------------------------
+    weather_keywords = [
+        "weather",
+        "temperature",
+        "forecast",
+        "rain",
+        "climate",
+    ]
 
-User:
-{user_query}
-"""
+    if any(word in query for word in weather_keywords):
+        return "weather"
 
-    response = ask_gemini_prompt(prompt)
+    # -------------------------
+    # Math
+    # -------------------------
+    math_pattern = r"^[0-9\s\+\-\*\/\(\)\.%]+$"
 
-    return response.strip().upper()
+    if re.match(math_pattern, query):
+        return "math"
+
+    # -------------------------
+    # Default Routing
+    # -------------------------
+    return "general"
