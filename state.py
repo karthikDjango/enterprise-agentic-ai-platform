@@ -9,4 +9,5 @@ class GraphState(TypedDict):
     response: Optional[str]
     tool_used: Optional[str]
     intent: Optional[str]
+    session_id: Optional[str]          # NEW
     messages: Annotated[list[BaseMessage], add_messages]

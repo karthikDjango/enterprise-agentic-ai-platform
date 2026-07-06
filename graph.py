@@ -1,14 +1,17 @@
 from langgraph.graph import StateGraph
 
 from state import GraphState
-from nodes import (
-    router_node,
-    conversation_node,
-    greeting_node,
-    math_node,
-    weather_node,
-    search_node,
-    rag_node,
+from nodes.router.router_node import router_node
+
+from nodes.execution.conversation_node import conversation_node
+from nodes.execution.greeting_node import greeting_node
+from nodes.execution.math_node import math_node
+from nodes.execution.weather_node import weather_node
+from nodes.execution.search_node import search_node
+from nodes.execution.rag_node import rag_node
+
+from nodes.post_processing.conversation_history_node import (
+    conversation_history_node,
 )
 
 
@@ -32,6 +35,10 @@ builder.add_node("greeting", greeting_node)
 builder.add_node("math", math_node)
 builder.add_node("search", search_node)
 builder.add_node("rag", rag_node)
+builder.add_node(
+    "conversation_history",
+    conversation_history_node,
+)
 
 
 # Entry point

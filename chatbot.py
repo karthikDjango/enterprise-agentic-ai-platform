@@ -2,16 +2,20 @@ from graph import app
 
 
 def get_response(user_question: str) -> str:
+
+    session_id = "session-1"
+
     result = app.invoke(
-    {
-        "question": user_question
-    },
-    config={
-        "configurable": {
-            "thread_id": "session-1"
-        }
-    }
-)
+        {
+            "question": user_question,
+            "session_id": session_id,
+        },
+        config={
+            "configurable": {
+                "thread_id": session_id,
+            }
+        },
+    )
 
     return result["response"]
 
