@@ -1,4 +1,7 @@
 from graph import app
+from services.database_service import initialize_database
+
+initialize_database()
 
 
 def get_response(user_question: str) -> str:

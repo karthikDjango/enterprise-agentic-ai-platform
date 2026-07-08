@@ -5,8 +5,7 @@ DATABASE_NAME = "chatbot.db"
 
 def initialize_database():
     """
-    Creates the SQLite database and conversation_history table
-    if they do not already exist.
+    Create the SQLite database and conversation_history table.
     """
 
     connection = sqlite3.connect(DATABASE_NAME)
@@ -23,9 +22,14 @@ def initialize_database():
         )
         """
     )
+
+    connection.commit()
+    connection.close()
+
+
 def save_message(session_id: str, role: str, message: str):
     """
-    Saves a single message to the conversation_history table.
+    Save one message.
     """
 
     connection = sqlite3.connect(DATABASE_NAME)
@@ -40,9 +44,13 @@ def save_message(session_id: str, role: str, message: str):
         (session_id, role, message),
     )
 
+    connection.commit()
+    connection.close()
+
+
 def load_conversation(session_id: str):
     """
-    Loads all messages for a given session.
+    Load conversation history.
     """
 
     connection = sqlite3.connect(DATABASE_NAME)
@@ -60,9 +68,14 @@ def load_conversation(session_id: str):
 
     conversations = cursor.fetchall()
 
+    connection.close()
+
+    return conversations
+
+
 def delete_conversation(session_id: str):
     """
-    Deletes all messages for a given session.
+    Delete a conversation.
     """
 
     connection = sqlite3.connect(DATABASE_NAME)
@@ -76,8 +89,5 @@ def delete_conversation(session_id: str):
         (session_id,),
     )
 
-
-
-    return conversations   
     connection.commit()
     connection.close()

@@ -13,6 +13,16 @@ load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 RAG_RELEVANCE_THRESHOLD = 0.4
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_OWNER = os.getenv("GITHUB_OWNER")
+GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
+# ==========================
+# Jira Configuration
+# ==========================
+
+JIRA_BASE_URL = os.getenv("JIRA_BASE_URL")
+JIRA_EMAIL = os.getenv("JIRA_EMAIL")
+JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
 
 model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",

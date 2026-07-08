@@ -9,10 +9,10 @@ from nodes.execution.math_node import math_node
 from nodes.execution.weather_node import weather_node
 from nodes.execution.search_node import search_node
 from nodes.execution.rag_node import rag_node
-
 from nodes.post_processing.conversation_history_node import (
     conversation_history_node,
 )
+from nodes.enterprise.enterprise_node import enterprise_node
 
 
 
@@ -39,6 +39,10 @@ builder.add_node(
     "conversation_history",
     conversation_history_node,
 )
+builder.add_node(
+    "enterprise",
+    enterprise_node,
+)
 
 
 # Entry point
@@ -57,17 +61,47 @@ builder.add_conditional_edges(
         "conversation": "conversation",
         "search": "search",
         "rag": "rag",
+        "enterprise": "enterprise",
     },
 )
 
-# Finish points
-builder.set_finish_point("greeting")
-builder.set_finish_point("conversation")
-builder.set_finish_point("math")
-builder.set_finish_point("weather")
-builder.set_finish_point("search")
-builder.set_finish_point("rag")
+builder.add_edge(
+    "greeting",
+    "conversation_history",
+)
 
+builder.add_edge(
+    "conversation",
+    "conversation_history",
+)
+
+builder.add_edge(
+    "math",
+    "conversation_history",
+)
+
+builder.add_edge(
+    "weather",
+    "conversation_history",
+)
+
+builder.add_edge(
+    "search",
+    "conversation_history",
+)
+
+builder.add_edge(
+    "rag",
+    "conversation_history",
+)
+
+builder.add_edge(
+    "enterprise",
+    "conversation_history",
+)
+builder.set_finish_point(
+    "conversation_history"
+)
 
 # Compile
 memory = MemorySaver()

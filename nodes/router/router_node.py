@@ -6,16 +6,21 @@ def router_node(state):
     """
     Enterprise Router Node
 
-    This is the single entry point of the application.
-    It determines the user's intent and stores it in the state.
+    Responsibilities
+    ----------------
+    1. Determine the high-level user intent.
+    2. Route General requests to either RAG or Search.
+    3. Pass Enterprise requests directly to the Enterprise Domain.
     """
 
     user_query = state["question"]
 
     intent = classify_intent(user_query)
 
-    # Decide between RAG and Search
+    # Only General knowledge requests go through
+    # the Knowledge Domain (RAG/Search).
     if intent == "general":
+
         if has_relevant_documents(user_query):
             intent = "rag"
         else:

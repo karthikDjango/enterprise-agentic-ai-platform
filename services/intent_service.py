@@ -1,19 +1,9 @@
-print(">>> LOADED NEW intent_service.py")
-
 import re
 
 
-def classify_intent(user_query: str) -> str:
-    """
-    Enterprise Intent Router
+def classify_intent(query: str) -> str:
+    query = query.lower().strip()
 
-    Rule-based routing first.
-    Everything else is treated as a general knowledge request.
-    The Router Node will decide whether to use RAG or Search.
-    """
-
-    query = user_query.lower().strip()
-    print(">>> classify_intent() called")
     # -------------------------
     # Greeting
     # -------------------------
@@ -27,6 +17,7 @@ def classify_intent(user_query: str) -> str:
     }
 
     if query in greetings:
+        print(">>> Intent: greeting")
         return "greeting"
 
     # -------------------------
@@ -41,6 +32,7 @@ def classify_intent(user_query: str) -> str:
     ]
 
     if any(word in query for word in weather_keywords):
+        print(">>> Intent: weather")
         return "weather"
 
     # -------------------------
@@ -49,9 +41,41 @@ def classify_intent(user_query: str) -> str:
     math_pattern = r"^[0-9\s\+\-\*\/\(\)\.%]+$"
 
     if re.match(math_pattern, query):
+        print(">>> Intent: math")
         return "math"
 
     # -------------------------
-    # Default Routing
+    # Enterprise
     # -------------------------
+    enterprise_keywords = [
+        "github",
+        "repository",
+        "repo",
+        "branch",
+        "commit",
+        "pull request",
+        "pr",
+        "issue",
+        "issues",
+        "jira",
+        "story",
+        "epic",
+        "sprint",
+        "ticket",
+        "email",
+        "mail",
+        "calendar",
+        "meeting",
+        "schedule",
+        "event",
+    ]
+
+    if any(keyword in query for keyword in enterprise_keywords):
+        print(">>> Intent: enterprise")
+        return "enterprise"
+
+    # -------------------------
+    # Default
+    # -------------------------
+    print(">>> Intent: general")
     return "general"
