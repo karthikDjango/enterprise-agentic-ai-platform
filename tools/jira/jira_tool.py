@@ -30,18 +30,12 @@ class JiraTool:
             "Accept": "application/json",
         }
 
-    def get_project_issues(self, project_key: str) -> dict:
+    def _get(self, endpoint: str, params: dict = None) -> dict:
         """
-        Get issues from a Jira project.
+        Execute an authenticated HTTP GET request.
         """
 
-        url = f"{JIRA_BASE_URL}/rest/api/3/search/jql"
-
-        params = {
-            "jql": f"project = {project_key} ORDER BY created DESC",
-            "maxResults": 10,
-            "fields": "summary,status,assignee",
-        }
+        url = f"{JIRA_BASE_URL}{endpoint}"
 
         response = requests.get(
             url=url,
@@ -51,11 +45,103 @@ class JiraTool:
             timeout=30,
         )
 
-        print("URL:", response.url)
-        print("Status:", response.status_code)
-        print("Content-Type:", response.headers.get("Content-Type"))
-        print("First 500 chars:")
-        print(response.text[:500])
+        response.raise_for_status()
+
+        return response.json()
+
+    def _post(self, endpoint: str, data: dict = None) -> dict:
+        """
+        Execute an authenticated HTTP POST request.
+        """
+
+        url = f"{JIRA_BASE_URL}{endpoint}"
+
+        response = requests.post(
+            url=url,
+            headers=self.headers,
+            auth=self.auth,
+            json=data,
+            timeout=30,
+        )
 
         response.raise_for_status()
+
         return response.json()
+
+    def _put(self, endpoint: str, data: dict = None) -> dict:
+        """
+        Execute an authenticated HTTP PUT request.
+        """
+
+        url = f"{JIRA_BASE_URL}{endpoint}"
+
+        response = requests.put(
+            url=url,
+            headers=self.headers,
+            auth=self.auth,
+            json=data,
+            timeout=30,
+        )
+
+        response.raise_for_status()
+
+        return response.json()
+
+    def get_project_issues(self, project_key: str) -> dict:
+        """
+        Get issues from a Jira project.
+        """
+
+        params = {
+            "jql": f"project = {project_key} ORDER BY created DESC",
+            "maxResults": 10,
+            "fields": "summary,status,assignee",
+        }
+
+        return self._get(
+            endpoint="/rest/api/3/search/jql",
+            params=params,
+        )
+
+    def create_issue(
+        self,
+        project_key: str,
+        summary: str,
+        description: str,
+        issue_type: str = "Story",
+    ) -> dict:
+        """
+        Create a Jira issue.
+        """
+
+        data = {
+            "fields": {
+                "project": {
+                    "key": project_key,
+                },
+                "summary": summary,
+                "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": description,
+                                }
+                            ],
+                        }
+                    ],
+                },
+                "issuetype": {
+                    "name": issue_type,
+                },
+            }
+        }
+
+        return self._post(
+            endpoint="/rest/api/3/issue",
+            data=data,
+        )
