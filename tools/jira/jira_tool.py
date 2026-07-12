@@ -102,7 +102,14 @@ class JiraTool:
             endpoint="/rest/api/3/search/jql",
             params=params,
         )
+    def get_issue(self, issue_key: str) -> dict:
+        """
+         Get a single Jira issue.
+        """
 
+        return self._get(
+        endpoint=f"/rest/api/3/issue/{issue_key}",
+        )
     def create_issue(
         self,
         project_key: str,

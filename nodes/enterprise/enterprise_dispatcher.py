@@ -1,64 +1,45 @@
-"""
-Enterprise Tool Dispatcher
-
-Responsibility:
-- Decide which enterprise tool should execute the request.
-- Return the execution node name.
-
-This module does NOT execute tools.
-"""
+import re
 
 
 class EnterpriseDispatcher:
 
     def dispatch(self, question: str) -> str:
+       
         question = question.lower()
+
+        # Detect Jira issue keys like EAI-6
+        if re.search(r"[a-z]+-\d+", question):
+            
+            return "jira"
 
         github_keywords = [
             "github",
             "repository",
+            "repositories",
             "repo",
+            "repos",
             "pull request",
             "pr",
             "commit",
             "branch",
-            "issue",
         ]
 
         jira_keywords = [
             "jira",
+            "ticket",
+            "tickets",
             "story",
+            "stories",
             "epic",
             "sprint",
             "backlog",
-            "ticket",
         ]
-
-        email_keywords = [
-            "email",
-            "mail",
-            "outlook",
-            "gmail",
-        ]
-
-        calendar_keywords = [
-            "calendar",
-            "meeting",
-            "schedule",
-            "appointment",
-            "event",
-        ]
-
-        if any(word in question for word in github_keywords):
-            return "github"
 
         if any(word in question for word in jira_keywords):
             return "jira"
 
-        if any(word in question for word in email_keywords):
-            return "email"
+        if any(word in question for word in github_keywords):
+            return "github"
 
-        if any(word in question for word in calendar_keywords):
-            return "calendar"
-
+        
         return "unknown"
