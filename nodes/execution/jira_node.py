@@ -8,7 +8,9 @@ Responsibility:
 """
 
 from state import GraphState
-from services.jira_service import handle_jira_request
+from services.jira_service import JiraService
+
+jira_service = JiraService()
 
 
 def jira_node(state: GraphState) -> GraphState:
@@ -16,7 +18,7 @@ def jira_node(state: GraphState) -> GraphState:
 
     request = state.get("enterprise_request")
 
-    response = handle_jira_request(request)
+    response = jira_service.execute(request)
 
     state["response"] = response
     state["tool_used"] = "Jira"
