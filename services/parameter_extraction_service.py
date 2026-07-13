@@ -31,7 +31,13 @@ class ParameterExtractionService:
 
         prompt = get_parameter_extraction_prompt(user_input)
 
+        print("\n===== PARAMETER EXTRACTION PROMPT =====")
+        print(prompt)
+
         response = ask_gemini_prompt(prompt)
+
+        print("\n===== GEMINI RESPONSE =====")
+        print(response)
 
         try:
             data = json.loads(response)

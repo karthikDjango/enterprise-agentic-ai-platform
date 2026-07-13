@@ -110,9 +110,13 @@ Supported tools:
 
 Supported Jira operations:
 
+Supported Jira operations:
+
 - list_issues
 - get_issue
 - create_issue
+- update_issue
+- delete_issue
 
 Supported GitHub operations:
 

@@ -6,10 +6,12 @@ from nodes.execution.jira_node import jira_node
 from nodes.enterprise.enterprise_dispatcher import EnterpriseDispatcher
 
 from services.parameter_extraction_service import ParameterExtractionService
+from services.governance_service import GovernanceService
 
 
 dispatcher = EnterpriseDispatcher()
 parameter_extractor = ParameterExtractionService()
+governance_service = GovernanceService()
 
 
 def email_node(state: GraphState) -> GraphState:
@@ -46,9 +48,10 @@ def enterprise_node(state: GraphState) -> GraphState:
     ----------------
     1. Receive user request
     2. Extract EnterpriseRequest using AI
-    3. Store EnterpriseRequest in GraphState
-    4. Ask dispatcher which tool should execute
-    5. Execute the appropriate handler
+    3. Evaluate Governance
+    4. Store EnterpriseRequest in GraphState
+    5. Ask dispatcher which tool should execute
+    6. Execute the appropriate handler
     """
 
     print("🏢 Enterprise Node")
@@ -59,12 +62,30 @@ def enterprise_node(state: GraphState) -> GraphState:
         # AI understands the request
         request = parameter_extractor.extract(question)
 
-        # Store for downstream nodes
+        # Store request for downstream nodes
         state["enterprise_request"] = request
 
         print(f"Enterprise Request: {request}")
 
-        # Dispatcher no longer parses English
+        # Evaluate governance policies
+        governance_decision = governance_service.evaluate(request)
+
+        # Store governance decision
+        state["governance_decision"] = governance_decision
+
+        print(f"Governance Decision: {governance_decision}")
+
+        # Stop execution if governance blocks the request
+        if not governance_decision.allowed:
+            state["response"] = (
+                "Request blocked by AI Governance.\n"
+                f"Risk: {governance_decision.risk}\n"
+                f"Reason: {governance_decision.reason}"
+            )
+            state["tool_used"] = "Governance"
+            return state
+
+        # Dispatcher selects the execution node
         tool = dispatcher.dispatch(request)
 
         print(f"Enterprise Tool Selected: {tool}")

@@ -96,5 +96,4 @@ class GitHubService(BaseService):
 
         return self._handle_repository_details()
     
-    print("Methods in GitHubService:")
-    print([m for m in dir(GitHubService) if not m.startswith("__")])
+    

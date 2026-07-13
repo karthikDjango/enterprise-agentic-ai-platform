@@ -4,6 +4,7 @@ from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 
 from models.enterprise_request import EnterpriseRequest
+from models.governance_decision import GovernanceDecision
 
 
 class GraphState(TypedDict):
@@ -13,7 +14,10 @@ class GraphState(TypedDict):
     intent: Optional[str]
     session_id: Optional[str]
 
-    # NEW
+    # Enterprise request produced by the AI
     enterprise_request: Optional[EnterpriseRequest]
+
+    # Governance decision produced before execution
+    governance_decision: Optional[GovernanceDecision]
 
     messages: Annotated[list[BaseMessage], add_messages]
