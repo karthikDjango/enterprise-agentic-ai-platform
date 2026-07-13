@@ -1,14 +1,15 @@
 from state import GraphState
 
 from nodes.execution.github_node import github_node
-from nodes.enterprise.enterprise_dispatcher import EnterpriseDispatcher
 from nodes.execution.jira_node import jira_node
+
+from nodes.enterprise.enterprise_dispatcher import EnterpriseDispatcher
+
+from services.parameter_extraction_service import ParameterExtractionService
 
 
 dispatcher = EnterpriseDispatcher()
-
-
-
+parameter_extractor = ParameterExtractionService()
 
 
 def email_node(state: GraphState) -> GraphState:
@@ -29,7 +30,6 @@ def unknown_enterprise_node(state: GraphState) -> GraphState:
     return state
 
 
-# Registry of Enterprise Tool Handlers
 NODE_REGISTRY = {
     "github": github_node,
     "jira": jira_node,
@@ -44,19 +44,37 @@ def enterprise_node(state: GraphState) -> GraphState:
 
     Responsibilities
     ----------------
-    1. Receive GraphState
-    2. Ask the dispatcher which enterprise tool is needed
-    3. Execute the correct handler from the registry
+    1. Receive user request
+    2. Extract EnterpriseRequest using AI
+    3. Store EnterpriseRequest in GraphState
+    4. Ask dispatcher which tool should execute
+    5. Execute the appropriate handler
     """
 
     print("🏢 Enterprise Node")
 
     question = state.get("question", "")
 
-    tool = dispatcher.dispatch(question)
+    try:
+        # AI understands the request
+        request = parameter_extractor.extract(question)
 
-    print(f"Enterprise Tool Selected: {tool}")
+        # Store for downstream nodes
+        state["enterprise_request"] = request
 
-    handler = NODE_REGISTRY.get(tool, unknown_enterprise_node)
+        print(f"Enterprise Request: {request}")
 
-    return handler(state)
+        # Dispatcher no longer parses English
+        tool = dispatcher.dispatch(request)
+
+        print(f"Enterprise Tool Selected: {tool}")
+
+        handler = NODE_REGISTRY.get(tool, unknown_enterprise_node)
+
+        return handler(state)
+
+    except Exception as e:
+        state["response"] = f"Enterprise request failed: {e}"
+        state["tool_used"] = "Enterprise"
+
+        return state

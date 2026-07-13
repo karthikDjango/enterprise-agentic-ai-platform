@@ -1,5 +1,4 @@
-import re
-
+from models.enterprise_request import EnterpriseRequest
 from tools.jira.jira_tool import JiraTool
 
 jira_tool = JiraTool()
@@ -50,15 +49,8 @@ def _handle_get_issue(issue_key: str) -> str:
     )
 
 
-def _handle_create_issue(question: str) -> str:
-    
-    summary = (
-        question.lower()
-        .replace("create jira story", "")
-        .replace("create story", "")
-        .strip()
-        .title()
-    )
+def _handle_create_issue(request: EnterpriseRequest) -> str:
+    summary = request.parameters.get("summary")
 
     if not summary:
         return "Please provide a story summary."
@@ -71,19 +63,27 @@ def _handle_create_issue(question: str) -> str:
     )
 
 
-def handle_jira_request(question: str) -> str:
+def handle_jira_request(request: EnterpriseRequest) -> str:
+    """
+    Execute Jira operations from a structured EnterpriseRequest.
+    """
+
     print("✅ Jira Service")
-    question = question.strip().lower()
 
-    if question.startswith("create jira story"):
-        
-        return _handle_create_issue(question)
+    operation = request.operation
 
-    match = re.search(r"[A-Z]+-\d+", question.upper())
+    if operation == "create_issue":
+        return _handle_create_issue(request)
 
-    if match:
-        
-        return _handle_get_issue(match.group())
+    if operation == "get_issue":
+        issue_key = request.parameters.get("issue_key")
 
-    print(">>> LIST ISSUES PATH")
-    return _handle_list_issues()
+        if not issue_key:
+            return "Issue key is missing."
+
+        return _handle_get_issue(issue_key)
+
+    if operation == "list_issues":
+        return _handle_list_issues()
+
+    return f"Unsupported Jira operation: {operation}"
