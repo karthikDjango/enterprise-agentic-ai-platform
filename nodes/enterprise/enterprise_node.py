@@ -7,11 +7,13 @@ from nodes.enterprise.enterprise_dispatcher import EnterpriseDispatcher
 
 from services.parameter_extraction_service import ParameterExtractionService
 from services.governance_service import GovernanceService
+from services.ai_security_service import AISecurityService
 
 
 dispatcher = EnterpriseDispatcher()
 parameter_extractor = ParameterExtractionService()
 governance_service = GovernanceService()
+security_service = AISecurityService()
 
 
 def email_node(state: GraphState) -> GraphState:
@@ -46,12 +48,13 @@ def enterprise_node(state: GraphState) -> GraphState:
 
     Responsibilities
     ----------------
-    1. Receive user request
-    2. Extract EnterpriseRequest using AI
-    3. Evaluate Governance
-    4. Store EnterpriseRequest in GraphState
-    5. Ask dispatcher which tool should execute
-    6. Execute the appropriate handler
+    1. AI Security validation
+    2. Receive user request
+    3. Extract EnterpriseRequest using AI
+    4. Evaluate Governance
+    5. Store EnterpriseRequest in GraphState
+    6. Ask dispatcher which tool should execute
+    7. Execute the appropriate handler
     """
 
     print("🏢 Enterprise Node")
@@ -59,23 +62,42 @@ def enterprise_node(state: GraphState) -> GraphState:
     question = state.get("question", "")
 
     try:
-        # AI understands the request
+        # --------------------------------------------------
+        # STEP 1 : AI Security
+        # --------------------------------------------------
+        security_decision = security_service.evaluate(question)
+
+        state["security_decision"] = security_decision
+
+        print(f"Security Decision: {security_decision}")
+
+        if not security_decision.allowed:
+            state["response"] = (
+                "Request blocked by AI Security.\n"
+                f"Risk: {security_decision.risk}\n"
+                f"Reason: {security_decision.reason}"
+            )
+            state["tool_used"] = "AI Security"
+            return state
+
+        # --------------------------------------------------
+        # STEP 2 : AI Parameter Extraction
+        # --------------------------------------------------
         request = parameter_extractor.extract(question)
 
-        # Store request for downstream nodes
         state["enterprise_request"] = request
 
         print(f"Enterprise Request: {request}")
 
-        # Evaluate governance policies
+        # --------------------------------------------------
+        # STEP 3 : AI Governance
+        # --------------------------------------------------
         governance_decision = governance_service.evaluate(request)
 
-        # Store governance decision
         state["governance_decision"] = governance_decision
 
         print(f"Governance Decision: {governance_decision}")
 
-        # Stop execution if governance blocks the request
         if not governance_decision.allowed:
             state["response"] = (
                 "Request blocked by AI Governance.\n"
@@ -85,7 +107,9 @@ def enterprise_node(state: GraphState) -> GraphState:
             state["tool_used"] = "Governance"
             return state
 
-        # Dispatcher selects the execution node
+        # --------------------------------------------------
+        # STEP 4 : Dispatcher
+        # --------------------------------------------------
         tool = dispatcher.dispatch(request)
 
         print(f"Enterprise Tool Selected: {tool}")
